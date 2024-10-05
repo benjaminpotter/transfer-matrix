@@ -87,7 +87,7 @@ mod tests {
     use approx::assert_relative_eq;
 
     #[test]
-    fn air_glass_air() {
+    fn single_layer() {
         let mut stack: LayerStack = LayerStack::new();
 
         // Initialize the stack.
@@ -97,6 +97,26 @@ mod tests {
 
         let (refl, trns) = stack.transfer(500.0).unwrap();
 
-        assert_relative_eq!(refl, 0.150, epsilon = 0.01);
+        // Allowing +/-1 in the last significant digit.
+        assert_relative_eq!(refl, 0.150, epsilon = 0.001);
+        assert_relative_eq!(trns, 0.0530, epsilon = 0.0001);
+    }
+
+    #[test]
+    fn triple_layer() {
+        let mut stack: LayerStack = LayerStack::new();
+
+        // Initialize the stack.
+        stack.add_layer(Layer::new(1.00, 0.00));
+        stack.add_layer(Layer::new(2.00, 400.));
+        stack.add_layer(Layer::new(1.44, 500.));
+        stack.add_layer(Layer::new(3.50, 220.));
+        stack.add_layer(Layer::new(1.44, 0.00));
+
+        let (refl, trns) = stack.transfer(500.0).unwrap();
+
+        // Allowing +/-1 in the last significant digit.
+        assert_relative_eq!(refl, 0.278, epsilon = 0.001);
+        assert_relative_eq!(trns, 0.00195, epsilon = 0.00001);
     }
 }

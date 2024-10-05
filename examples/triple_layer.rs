@@ -5,8 +5,10 @@ fn main() {
 
     // Initialize the stack.
     stack.add_layer(Layer::new(1.00, 0.00));
-    stack.add_layer(Layer::new(1.52, 400.));
-    stack.add_layer(Layer::new(1.00, 0.00));
+    stack.add_layer(Layer::new(2.00, 400.));
+    stack.add_layer(Layer::new(1.44, 500.));
+    stack.add_layer(Layer::new(3.50, 220.));
+    stack.add_layer(Layer::new(1.44, 0.00));
 
     let (refl, trns) = stack.transfer(500.0).unwrap();
 
