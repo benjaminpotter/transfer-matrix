@@ -5,9 +5,9 @@ fn main() {
     let mut stack: LayerStack = LayerStack::new();
 
     // Initialize the stack.
-    stack.add_layer(Layer::new(1.00, 0.00));
-    stack.add_layer(Layer::new(1.52, 400.));
-    stack.add_layer(Layer::new(1.00, 0.00));
+    stack.add_layer(Layer::new_air(0.00));
+    stack.add_layer(Layer::new_glass(400.));
+    stack.add_layer(Layer::new_air(0.00));
 
     let samples: Vec<(f64, (f64, f64))> = (400..1700)
         .map(|x| x as f64)

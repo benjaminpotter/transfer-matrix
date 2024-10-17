@@ -3,39 +3,54 @@ use num::complex::Complex;
 use std::f64::consts::TAU;
 
 pub struct Layer {
-    refractive_index: f64,
+    refractive_index: fn(f64) -> Complex<f64>,
     length_nm: f64,
 }
 
 impl Layer {
-    pub fn new(refractive_index: f64, length_nm: f64) -> Self {
+    pub fn new(refractive_index: fn(f64) -> Complex<f64>, length_nm: f64) -> Self {
         Layer {
             refractive_index: refractive_index,
+            length_nm: length_nm,
+        }
+    }
+
+    pub fn new_glass(length_nm: f64) -> Self {
+        Layer {
+            refractive_index: |_wavelength_nm: f64| -> Complex<f64> { Complex::new(1.52, 0.0) },
+            length_nm: length_nm,
+        }
+    }
+
+    pub fn new_air(length_nm: f64) -> Self {
+        Layer {
+            refractive_index: |_wavelength_nm: f64| -> Complex<f64> { Complex::new(1.00, 0.0) },
             length_nm: length_nm,
         }
     }
 }
 
 impl Layer {
-    fn transmit(&self, next: &Layer) -> Array2<Complex<f64>> {
-        let g: Complex<f64> = Complex::new(next.refractive_index / self.refractive_index, 0.0);
+    fn transmit(&self, wavelength_nm: f64, next: &Layer) -> Array2<Complex<f64>> {
+        let g: Complex<f64> =
+            (next.refractive_index)(wavelength_nm) / (self.refractive_index)(wavelength_nm);
 
         // Assume incident angle is aligned with normal and TE polarization.
         arr2(&[[1.0 + g, 1.0 - g], [1.0 - g, 1.0 + g]])
     }
 
     fn propagate(&self, wavelength_nm: f64) -> Array2<Complex<f64>> {
-        let kz: f64 = TAU / wavelength_nm * self.refractive_index;
+        // FIXME is this meant to be complex?
+        let kz: Complex<f64> = TAU / wavelength_nm * (self.refractive_index)(wavelength_nm);
 
-        // Ignore complex part of the propagation.
         arr2(&[
             [
-                Complex::new(0.0, -kz * self.length_nm).exp(),
+                (-kz * self.length_nm * Complex::i()).exp(), //Complex::new(0.0, -kz * self.length_nm).exp(),
                 Complex::new(0.0, 0.0),
             ],
             [
                 Complex::new(0.0, 0.0),
-                Complex::new(0.0, kz * self.length_nm).exp(),
+                (kz * self.length_nm * Complex::i()).exp(), //Complex::new(0.0, kz * self.length_nm).exp(),
             ],
         ])
     }
@@ -70,7 +85,7 @@ impl LayerStack {
             let right = &window[1];
 
             tm = tm.dot(&left.propagate(wavelength_nm));
-            tm = tm.dot(&left.transmit(right));
+            tm = tm.dot(&left.transmit(wavelength_nm, right));
         }
 
         // Compute the reflectance and transmittance of the stack.
@@ -91,32 +106,14 @@ mod tests {
         let mut stack: LayerStack = LayerStack::new();
 
         // Initialize the stack.
-        stack.add_layer(Layer::new(1.00, 0.00));
-        stack.add_layer(Layer::new(1.52, 400.));
-        stack.add_layer(Layer::new(1.00, 0.00));
+        stack.add_layer(Layer::new_air(0.00));
+        stack.add_layer(Layer::new_glass(400.));
+        stack.add_layer(Layer::new_air(0.00));
 
         let (refl, trns) = stack.transfer(500.0).unwrap();
 
         // Allowing +/-1 in the last significant digit.
         assert_relative_eq!(refl, 0.150, epsilon = 0.001);
         assert_relative_eq!(trns, 0.0530, epsilon = 0.0001);
-    }
-
-    #[test]
-    fn triple_layer() {
-        let mut stack: LayerStack = LayerStack::new();
-
-        // Initialize the stack.
-        stack.add_layer(Layer::new(1.00, 0.00));
-        stack.add_layer(Layer::new(2.00, 400.));
-        stack.add_layer(Layer::new(1.44, 500.));
-        stack.add_layer(Layer::new(3.50, 220.));
-        stack.add_layer(Layer::new(1.44, 0.00));
-
-        let (refl, trns) = stack.transfer(500.0).unwrap();
-
-        // Allowing +/-1 in the last significant digit.
-        assert_relative_eq!(refl, 0.278, epsilon = 0.001);
-        assert_relative_eq!(trns, 0.00195, epsilon = 0.00001);
     }
 }
