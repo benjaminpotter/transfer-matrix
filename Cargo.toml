@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 approx = "0.5.1"
+interp = "2.0.1"
 ndarray = "0.16.1"
 num = "0.4.3"
 plotters = "0.3.7"

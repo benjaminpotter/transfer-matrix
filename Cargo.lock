@@ -207,6 +207,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "either"
+version = "1.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "60b1af1c220855b6ceac025d3f6ecdd2b7c4894bfe9cd9bda4fbb4bc7c0d4cf0"
+
+[[package]]
 name = "fdeflate"
 version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -350,6 +356,25 @@ dependencies = [
  "jpeg-decoder",
  "num-traits",
  "png",
+]
+
+[[package]]
+name = "interp"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bbf8add5dd9442596f3c5f504fd4fbbdf6266ff2337a51f6430dfeff6fd3a4de"
+dependencies = [
+ "itertools",
+ "num-traits",
+]
+
+[[package]]
+name = "itertools"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
+dependencies = [
+ "either",
 ]
 
 [[package]]
@@ -731,6 +756,7 @@ name = "transfer-matrix"
 version = "0.1.0"
 dependencies = [
  "approx",
+ "interp",
  "ndarray",
  "num",
  "plotters",
