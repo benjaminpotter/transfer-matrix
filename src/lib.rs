@@ -40,17 +40,16 @@ impl Layer {
     }
 
     fn propagate(&self, wavelength_nm: f64) -> Array2<Complex<f64>> {
-        // FIXME is this meant to be complex?
         let kz: Complex<f64> = TAU / wavelength_nm * (self.refractive_index)(wavelength_nm);
 
         arr2(&[
             [
-                (-kz * self.length_nm * Complex::i()).exp(), //Complex::new(0.0, -kz * self.length_nm).exp(),
+                (-kz * self.length_nm * Complex::i()).exp(),
                 Complex::new(0.0, 0.0),
             ],
             [
                 Complex::new(0.0, 0.0),
-                (kz * self.length_nm * Complex::i()).exp(), //Complex::new(0.0, kz * self.length_nm).exp(),
+                (kz * self.length_nm * Complex::i()).exp(),
             ],
         ])
     }
